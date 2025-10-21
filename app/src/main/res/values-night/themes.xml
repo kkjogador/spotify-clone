@@ -1,0 +1,26 @@
+<resources xmlns:tools="http://schemas.android.com/tools">
+    <!-- Tema Escuro do Aplicativo -->
+    <style name="Theme.CadastroFacens" parent="Theme.MaterialComponents.DayNight.NoActionBar">
+        <!-- Cores Primárias -->
+        <item name="colorPrimary">@color/spotify_green</item>
+        <item name="colorPrimaryVariant">@color/spotify_green</item>
+        <item name="colorOnPrimary">@color/spotify_black</item>
+
+        <!-- Cores Secundárias -->
+        <item name="colorSecondary">@color/spotify_green</item>
+        <item name="colorSecondaryVariant">@color/spotify_green</item>
+        <item name="colorOnSecondary">@color/spotify_black</item>
+
+        <!-- Cor de Fundo e de Superfícies -->
+        <item name="android:colorBackground">@color/background_dark</item>
+        <item name="colorSurface">@color/background_dark_elevated</item> <!-- Cor de "cartões" e painéis -->
+
+        <!-- Cores de Texto e Ícones sobre o fundo/superfícies -->
+        <item name="colorOnBackground">@color/text_primary_dark</item>
+        <item name="colorOnSurface">@color/text_primary_dark</item>
+
+        <!-- Cor da Barra de Status -->
+        <item name="android:statusBarColor">@color/background_dark</item>
+        <item name="android:windowLightStatusBar">false</item> <!-- Ícones da barra de status ficam claros -->
+    </style>
+</resources>

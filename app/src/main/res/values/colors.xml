@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Paleta de Cores Inspirada no Spotify -->
+    
+    <!-- Primárias -->
+    <color name="spotify_green">#1DB954</color>
+    <color name="spotify_black">#191414</color>
+    <color name="spotify_white">#FFFFFF</color>
+    
+    <!-- Cores de Fundo -->
+    <color name="background_light">#F5F5F5</color>
+    <color name="background_dark">#121212</color>
+    <color name="background_dark_elevated">#242424</color>
+
+    <!-- Cores de Texto -->
+    <color name="text_primary_light">#000000</color>
+    <color name="text_secondary_light">#5A5A5A</color>
+    <color name="text_primary_dark">#FFFFFF</color>
+    <color name="text_secondary_dark">#B3B3B3</color>
+    
+    <!-- Cores de Ícones/Controles -->
+    <color name="icon_tint_light">#000000</color>
+    <color name="icon_tint_dark">#FFFFFF</color>
+    
+</resources>
