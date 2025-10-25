@@ -2,6 +2,7 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/now_playing_container"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="?android:attr/colorBackground"
@@ -26,15 +27,32 @@
         android:layout_margin="32dp"
         android:src="@drawable/ic_album_placeholder" />
 
-    <ImageButton
-        android:id="@+id/now_playing_like_button"
+    <LinearLayout
+        android:id="@+id/action_buttons_layout"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignBottom="@id/now_playing_artist"
         android:layout_alignParentEnd="true"
-        android:layout_marginEnd="24dp"
-        android:background="?attr/selectableItemBackgroundBorderless"
-        android:src="@drawable/ic_favorite_border"/>
+        android:layout_marginEnd="16dp"
+        android:gravity="center_vertical"
+        android:orientation="horizontal">
+
+        <ImageButton
+            android:id="@+id/now_playing_add_playlist_button"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="16dp"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:src="@drawable/ic_add_to_playlist" />
+
+        <ImageButton
+            android:id="@+id/now_playing_like_button"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:src="@drawable/ic_favorite_border"/>
+
+    </LinearLayout>
 
     <TextView
         android:id="@+id/now_playing_title"
@@ -42,7 +60,7 @@
         android:layout_height="wrap_content"
         android:layout_above="@id/now_playing_artist"
         android:layout_marginStart="24dp"
-        android:layout_toStartOf="@id/now_playing_like_button"
+        android:layout_toStartOf="@id/action_buttons_layout"
         android:text="Título da Música"
         android:textSize="22sp"
         android:textStyle="bold" />
@@ -54,7 +72,7 @@
         android:layout_above="@id/seekBar_layout"
         android:layout_marginStart="24dp"
         android:layout_marginBottom="32dp"
-        android:layout_toStartOf="@id/now_playing_like_button"
+        android:layout_toStartOf="@id/action_buttons_layout"
         android:text="Artista"
         android:textSize="16sp" />
 

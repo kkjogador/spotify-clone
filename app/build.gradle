@@ -4,6 +4,7 @@ plugins {
 
 android {
     namespace 'com.example.cadastrofacens'
+
     compileSdk {
         version = release(36)
     }

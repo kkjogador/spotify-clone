@@ -3,7 +3,9 @@ package com.example.cadastrofacens;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.app.AppCompatDelegate;
+import androidx.core.view.WindowCompat;
 import androidx.fragment.app.Fragment;
+import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
@@ -28,7 +30,7 @@ public class MainActivity extends AppCompatActivity {
 
     private MusicPlayer musicPlayer;
     private List<Song> songList;
-    private List<Playlist> userPlaylists;
+    private static List<Playlist> userPlaylists;
     private List<Song> recentlyPlayedSongs = new ArrayList<>();
     private SharedPreferences sharedPreferences;
     private final Handler handler = new Handler();
@@ -42,6 +44,9 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        // Garante que o layout não fique sob a barra de status
+        WindowCompat.setDecorFitsSystemWindows(getWindow(), true);
 
         sharedPreferences = getSharedPreferences("AppPrefs", MODE_PRIVATE);
         int themeMode = sharedPreferences.getInt("ThemeMode", AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM);
@@ -63,7 +68,7 @@ public class MainActivity extends AppCompatActivity {
 
         // Inicialização
         initializeSongList();
-        loadPlaylists();
+        loadPlaylists(this);
         musicPlayer.setSongList(songList);
         musicPlayer.loadSavedSongsState(this);
         setupPlayerControls();
@@ -149,12 +154,12 @@ public class MainActivity extends AppCompatActivity {
 
     public List<Song> getSongList() { return songList; }
     public List<Song> getSavedSongs() { return songList.stream().filter(Song::isSaved).collect(Collectors.toList()); }
-    public List<Playlist> getUserPlaylists() { return userPlaylists; }
+    public static List<Playlist> getUserPlaylists() { return userPlaylists; }
     public List<Song> getRecentlyPlayedSongs() { return recentlyPlayedSongs; }
 
     public void createNewPlaylist(String name) {
         userPlaylists.add(new Playlist(name));
-        savePlaylists();
+        savePlaylists(this);
     }
 
     public void toggleLikeStatus(Song song) {
@@ -188,15 +193,16 @@ public class MainActivity extends AppCompatActivity {
         builder.setAdapter(adapter, (dialog, which) -> {
             Playlist selectedPlaylist = userPlaylists.get(which);
             selectedPlaylist.addSong(song);
-            savePlaylists();
+            savePlaylists(this);
             Toast.makeText(this, "Adicionado a " + selectedPlaylist.getName(), Toast.LENGTH_SHORT).show();
         });
         builder.show();
     }
 
     // --- MÉTODOS PRIVADOS DE PERSISTÊNCIA ---
-    private void loadPlaylists() {
-        String json = sharedPreferences.getString("UserPlaylists", null);
+    private static void loadPlaylists(Context context) {
+        SharedPreferences prefs = context.getSharedPreferences("AppPrefs", Context.MODE_PRIVATE);
+        String json = prefs.getString("UserPlaylists", null);
         if (json != null) {
             Type type = new TypeToken<ArrayList<Playlist>>() {}.getType();
             userPlaylists = new Gson().fromJson(json, type);
@@ -205,9 +211,10 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-    private void savePlaylists() {
+    public static void savePlaylists(Context context) {
+        SharedPreferences prefs = context.getSharedPreferences("AppPrefs", Context.MODE_PRIVATE);
         String json = new Gson().toJson(userPlaylists);
-        sharedPreferences.edit().putString("UserPlaylists", json).apply();
+        prefs.edit().putString("UserPlaylists", json).apply();
     }
     
     private void updateRecentlyPlayed(Song song) {

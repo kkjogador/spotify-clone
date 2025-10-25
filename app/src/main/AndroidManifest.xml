@@ -21,8 +21,7 @@
         </activity>
         
         <activity
-            android:name=".NowPlayingActivity"
-            android:theme="@style/Theme.Design.BottomSheetDialog"/>
+            android:name=".NowPlayingActivity"/>
             
         <activity 
             android:name=".PlaylistActivity"/>
