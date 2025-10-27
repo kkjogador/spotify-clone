@@ -1,0 +1,47 @@
+{
+  "project_info": {
+    "project_number": "1087613188844",
+    "project_id": "cadastrofacens-a99a6695",
+    "storage_bucket": "cadastrofacens-a99a6695.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:1087613188844:android:4480ac01e72a8709ed83c9",
+        "android_client_info": {
+          "package_name": "com.example.cadastrofacens"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "1087613188844-8e9f0atfv1gmm4dgcr9k6a93tlfcg7r2.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.cadastrofacens",
+            "certificate_hash": "ca45f11d92c5b7a90ed49eb27828f62a4032d174"
+          }
+        },
+        {
+          "client_id": "1087613188844-2e6j7rpivqohg03ikq5svd0p5bluph3m.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAZj_yGYom8AbNy3kN0Z4F5WSy6kmcOWgY"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "1087613188844-25io2gqe1h598c7d5dccffk47nol3rpa.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

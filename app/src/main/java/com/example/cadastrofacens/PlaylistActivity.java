@@ -23,11 +23,15 @@ import androidx.recyclerview.widget.ItemTouchHelper;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
+
 public class PlaylistActivity extends AppCompatActivity implements SongAdapter.OnSongInteractionListener {
 
     private Playlist playlist;
     private MusicPlayer musicPlayer;
     private SongAdapter adapter;
+    private AppDatabase db; // Referência para o banco de dados
     private final Handler handler = new Handler();
 
     // Views do Mini-Player
@@ -42,6 +46,7 @@ public class PlaylistActivity extends AppCompatActivity implements SongAdapter.O
         WindowCompat.setDecorFitsSystemWindows(getWindow(), true);
         setContentView(R.layout.activity_playlist);
 
+        db = AppDatabase.getDatabase(this);
         musicPlayer = MusicPlayer.getInstance();
         playlist = (Playlist) getIntent().getSerializableExtra("playlist");
 
@@ -92,7 +97,10 @@ public class PlaylistActivity extends AppCompatActivity implements SongAdapter.O
                         .setPositiveButton("Excluir", (dialog, which) -> {
                             playlist.getSongs().remove(position);
                             adapter.notifyItemRemoved(position);
-                            MainActivity.savePlaylists(PlaylistActivity.this);
+                            // Deleta a relação do banco de dados
+                            AppDatabase.databaseWriteExecutor.execute(() -> {
+                                db.playlistDao().removeSongFromPlaylist(playlist.id, songToRemove.id);
+                            });
                         })
                         .setNegativeButton("Cancelar", (dialog, which) -> {
                             adapter.notifyItemChanged(position);
@@ -143,12 +151,8 @@ public class PlaylistActivity extends AppCompatActivity implements SongAdapter.O
 
     private void setupPlayerControls() {
         miniPlayerPlayPause.setOnClickListener(v -> musicPlayer.togglePlayPause());
-        miniPlayerLike.setOnClickListener(v -> {
-            Song currentSong = musicPlayer.getCurrentSong();
-            if (currentSong != null) {
-                musicPlayer.toggleLikeStatus(this, currentSong);
-            }
-        });
+        // TODO: Implementar like com banco de dados
+        // miniPlayerLike.setOnClickListener(v -> ...);
         miniPlayer.setOnClickListener(v -> {
             Intent intent = new Intent(PlaylistActivity.this, NowPlayingActivity.class);
             startActivity(intent);
@@ -173,7 +177,8 @@ public class PlaylistActivity extends AppCompatActivity implements SongAdapter.O
             miniPlayerArtist.setText(currentSong.getArtist());
             miniPlayerAlbumArt.setImageResource(R.drawable.ic_album_placeholder);
             miniPlayerPlayPause.setImageResource(musicPlayer.isPlaying() ? R.drawable.ic_pause : R.drawable.ic_play_arrow);
-            miniPlayerLike.setImageResource(currentSong.isSaved() ? R.drawable.ic_favorite_filled : R.drawable.ic_favorite_border);
+            // TODO: Implementar like com banco de dados
+            // miniPlayerLike.setImageResource(...);
         } else {
             miniPlayer.setVisibility(View.GONE);
         }
@@ -183,11 +188,24 @@ public class PlaylistActivity extends AppCompatActivity implements SongAdapter.O
     public void onSongClick(Song song) {
         musicPlayer.setSongList(playlist.getSongs());
         musicPlayer.playSong(this, song);
+        addSongToHistory(song);
+    }
+
+    private void addSongToHistory(Song song) {
+        FirebaseUser currentUser = FirebaseAuth.getInstance().getCurrentUser();
+        if (currentUser != null && song != null) {
+            AppDatabase.databaseWriteExecutor.execute(() -> {
+                db.playedSongDao().delete(currentUser.getUid(), song.id);
+                PlayedSong playedSong = new PlayedSong(currentUser.getUid(), song.id, System.currentTimeMillis());
+                db.playedSongDao().insert(playedSong);
+            });
+        }
     }
 
     @Override
     public void onOptionsMenuClick(Song song) {
-        musicPlayer.toggleLikeStatus(this, song);
+        // TODO: Implementar like com banco de dados
+        // musicPlayer.toggleLikeStatus(this, song);
         adapter.notifyDataSetChanged();
     }
 }

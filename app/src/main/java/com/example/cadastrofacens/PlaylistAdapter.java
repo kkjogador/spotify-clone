@@ -36,7 +36,6 @@ public class PlaylistAdapter extends RecyclerView.Adapter<PlaylistAdapter.Playli
         Playlist playlist = playlists.get(position);
         holder.playlistName.setText(playlist.getName());
         
-        // Lógica para diferenciar a capa da playlist "Músicas Curtidas"
         if (playlist.getName().equals("Músicas Curtidas")) {
             holder.playlistCover.setImageResource(R.drawable.ic_favorite_filled);
         } else {
@@ -49,6 +48,13 @@ public class PlaylistAdapter extends RecyclerView.Adapter<PlaylistAdapter.Playli
     @Override
     public int getItemCount() {
         return playlists.size();
+    }
+
+    // Método para atualizar a lista de playlists do adaptador
+    public void updatePlaylists(List<Playlist> newPlaylists) {
+        this.playlists.clear();
+        this.playlists.addAll(newPlaylists);
+        notifyDataSetChanged();
     }
 
     public static class PlaylistViewHolder extends RecyclerView.ViewHolder {

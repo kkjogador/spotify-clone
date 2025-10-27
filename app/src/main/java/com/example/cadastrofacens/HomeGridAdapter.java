@@ -9,6 +9,7 @@ import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 import java.util.List;
 
+// Adaptador restaurado para funcionar com Playlists
 public class HomeGridAdapter extends RecyclerView.Adapter<HomeGridAdapter.GridViewHolder> {
 
     private final List<Playlist> playlists;
@@ -34,7 +35,8 @@ public class HomeGridAdapter extends RecyclerView.Adapter<HomeGridAdapter.GridVi
     public void onBindViewHolder(@NonNull GridViewHolder holder, int position) {
         Playlist playlist = playlists.get(position);
         holder.title.setText(playlist.getName());
-        
+
+        // Lógica para mostrar o coração verde para a playlist "Músicas Curtidas"
         if (playlist.getName().equals("Músicas Curtidas")) {
             holder.image.setImageResource(R.drawable.ic_favorite_filled);
         } else {

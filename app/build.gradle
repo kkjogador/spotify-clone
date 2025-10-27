@@ -1,5 +1,6 @@
 plugins {
     alias(libs.plugins.android.application)
+    id 'com.google.gms.google-services'
 }
 
 android {
@@ -38,16 +39,23 @@ dependencies {
     androidTestImplementation libs.ext.junit
     androidTestImplementation libs.espresso.core
 
-    // Dependências para o Login com Google
+    // Firebase
+    implementation platform('com.google.firebase:firebase-bom:32.7.0')
+    implementation 'com.google.firebase:firebase-auth'
     implementation 'com.google.android.gms:play-services-auth:21.0.0'
     
-    // Dependência para carregar imagens (Glide)
+    // UI
     implementation 'com.github.bumptech.glide:glide:4.16.0'
-
-    // Dependência para extrair cores da imagem (Efeito de Fundo Dinâmico)
     implementation 'androidx.palette:palette:1.0.0'
 
-    // Dependência para serialização de objetos (Salvar Playlists)
-    implementation 'com.google.code.gson:gson:2.9.0'
+    // Room Database
+    def room_version = "2.6.1"
+    implementation "androidx.room:room-runtime:$room_version"
+    annotationProcessor "androidx.room:room-compiler:$room_version"
+
+    // ViewModel e LiveData
+    def lifecycle_version = "2.7.0"
+    implementation "androidx.lifecycle:lifecycle-viewmodel:$lifecycle_version"
+    implementation "androidx.lifecycle:lifecycle-livedata:$lifecycle_version"
 
 }

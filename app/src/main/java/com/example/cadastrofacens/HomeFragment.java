@@ -11,6 +11,7 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
+import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -18,6 +19,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
+import java.util.stream.Collectors;
 
 public class HomeFragment extends Fragment implements SongAdapter.OnSongInteractionListener, HomeGridAdapter.OnPlaylistClickListener {
 
@@ -27,6 +29,7 @@ public class HomeFragment extends Fragment implements SongAdapter.OnSongInteract
     private SongAdapter songAdapter;
     private TextView greetingText;
     private TextView txtEmptyState;
+    private MainViewModel mainViewModel;
     private MainActivity mainActivity;
 
     @Override
@@ -37,12 +40,18 @@ public class HomeFragment extends Fragment implements SongAdapter.OnSongInteract
         }
     }
 
+    @Override
+    public void onCreate(@Nullable Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        // Obtém o ViewModel que é compartilhado com a MainActivity
+        mainViewModel = new ViewModelProvider(requireActivity()).get(MainViewModel.class);
+    }
+
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_home, container, false);
 
-        // Encontrando as Views do layout
         quickAccessGrid = view.findViewById(R.id.quick_access_grid);
         recentlyPlayedRecyclerView = view.findViewById(R.id.recyclerViewRecentlyPlayed);
         greetingText = view.findViewById(R.id.greeting_text);
@@ -55,7 +64,8 @@ public class HomeFragment extends Fragment implements SongAdapter.OnSongInteract
 
         setGreeting();
         setupQuickAccessGrid();
-        loadRecentlyPlayed(); // Chamada para o método restaurado
+        // A carga agora é feita observando o ViewModel
+        observeViewModel();
 
         return view;
     }
@@ -74,37 +84,40 @@ public class HomeFragment extends Fragment implements SongAdapter.OnSongInteract
 
     private void setupQuickAccessGrid() {
         List<Playlist> quickAccessPlaylists = new ArrayList<>();
+        // TODO: Implementar Músicas Curtidas a partir do ViewModel
         Playlist likedSongsPlaylist = new Playlist("Músicas Curtidas");
-        if (mainActivity != null) {
-            mainActivity.getSavedSongs().forEach(likedSongsPlaylist::addSong);
-        }
         quickAccessPlaylists.add(likedSongsPlaylist);
-        
+
         gridAdapter = new HomeGridAdapter(quickAccessPlaylists, this);
         quickAccessGrid.setLayoutManager(new GridLayoutManager(getContext(), 2, GridLayoutManager.HORIZONTAL, false));
         quickAccessGrid.setAdapter(gridAdapter);
     }
 
-    // MÉTODO RESTAURADO
-    private void loadRecentlyPlayed() {
-        if (mainActivity == null) return;
-        
-        List<Song> recentlyPlayed = mainActivity.getRecentlyPlayedSongs();
-        if (recentlyPlayed.isEmpty()) {
-            if(txtEmptyState != null) txtEmptyState.setVisibility(View.VISIBLE);
-            if(recentlyPlayedRecyclerView != null) recentlyPlayedRecyclerView.setVisibility(View.GONE);
-        } else {
-            if(txtEmptyState != null) txtEmptyState.setVisibility(View.GONE);
-            if(recentlyPlayedRecyclerView != null) {
-                recentlyPlayedRecyclerView.setVisibility(View.VISIBLE);
-                songAdapter = new SongAdapter(recentlyPlayed, this);
-                recentlyPlayedRecyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
-                recentlyPlayedRecyclerView.setAdapter(songAdapter);
-            }
-        }
-    }
+    // O HomeFragment agora observa as mudanças nos dados do ViewModel
+    private void observeViewModel() {
+        mainViewModel.getRecentlyPlayedSongIds().observe(getViewLifecycleOwner(), songIds -> {
+            if (mainActivity == null) return;
+            
+            List<Song> allSongs = mainActivity.getAllSongs();
+            if (songIds == null || songIds.isEmpty() || allSongs == null) {
+                if(txtEmptyState != null) txtEmptyState.setVisibility(View.VISIBLE);
+                if(recentlyPlayedRecyclerView != null) recentlyPlayedRecyclerView.setVisibility(View.GONE);
+            } else {
+                List<Song> recentlyPlayed = songIds.stream()
+                    .map(songId -> allSongs.stream().filter(s -> s.id == songId).findFirst().orElse(null))
+                    .filter(java.util.Objects::nonNull)
+                    .collect(Collectors.toList());
 
-    // --- MÉTODOS DE INTERAÇÃO COM AS LISTAS ---
+                if(txtEmptyState != null) txtEmptyState.setVisibility(View.GONE);
+                if(recentlyPlayedRecyclerView != null) {
+                    recentlyPlayedRecyclerView.setVisibility(View.VISIBLE);
+                    songAdapter = new SongAdapter(recentlyPlayed, this);
+                    recentlyPlayedRecyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
+                    recentlyPlayedRecyclerView.setAdapter(songAdapter);
+                }
+            }
+        });
+    }
 
     @Override
     public void onSongClick(Song song) {
@@ -115,9 +128,7 @@ public class HomeFragment extends Fragment implements SongAdapter.OnSongInteract
 
     @Override
     public void onOptionsMenuClick(Song song) {
-        if (mainActivity != null) {
-            mainActivity.showSongOptionsMenu(song);
-        }
+        // Não implementado para o HomeFragment
     }
 
     @Override
@@ -125,11 +136,5 @@ public class HomeFragment extends Fragment implements SongAdapter.OnSongInteract
         Intent intent = new Intent(getActivity(), PlaylistActivity.class);
         intent.putExtra("playlist", playlist);
         startActivity(intent);
-    }
-
-    @Override
-    public void onResume() {
-        super.onResume();
-        loadRecentlyPlayed(); // Chamada para o método restaurado
     }
 }

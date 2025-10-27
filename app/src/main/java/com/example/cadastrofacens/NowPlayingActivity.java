@@ -1,15 +1,12 @@
 package com.example.cadastrofacens;
 
-import android.content.DialogInterface;
 import android.content.res.ColorStateList;
 import android.graphics.Rect;
 import android.os.Bundle;
 import android.os.Handler;
 import android.view.View;
-import android.view.Window;
 import android.widget.ImageButton;
 import android.widget.ImageView;
-import android.widget.RelativeLayout;
 import android.widget.SeekBar;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -18,7 +15,9 @@ import androidx.annotation.Nullable;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.content.ContextCompat;
+import androidx.lifecycle.ViewModelProvider;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 import java.util.concurrent.TimeUnit;
@@ -26,21 +25,25 @@ import java.util.concurrent.TimeUnit;
 public class NowPlayingActivity extends AppCompatActivity {
 
     private MusicPlayer musicPlayer;
+    private AppDatabase db;
     private TextView title, artist, currentTime, totalDuration;
     private ImageView albumArt;
     private ImageButton playPause, prev, next, downArrow, shuffle, repeat, like, addToPlaylistButton;
     private SeekBar seekBar;
     private final Handler handler = new Handler();
+    private MainViewModel mainViewModel;
+    private List<Playlist> userPlaylists = new ArrayList<>();
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_now_playing);
 
-        // Correção definitiva para a sobreposição da barra de status
+        db = AppDatabase.getDatabase(this);
         applyStatusBarPadding();
 
         musicPlayer = MusicPlayer.getInstance();
+        mainViewModel = new ViewModelProvider(this).get(MainViewModel.class);
 
         title = findViewById(R.id.now_playing_title);
         artist = findViewById(R.id.now_playing_artist);
@@ -65,15 +68,24 @@ public class NowPlayingActivity extends AppCompatActivity {
         repeat.setOnClickListener(v -> musicPlayer.cycleRepeatMode());
 
         like.setOnClickListener(v -> {
-            Song currentSong = musicPlayer.getCurrentSong();
-            if (currentSong != null) {
-                musicPlayer.toggleLikeStatus(this, currentSong);
-            }
+            // TODO: Implementar músicas curtidas com o banco de dados
         });
 
         addToPlaylistButton.setOnClickListener(v -> showAddToPlaylistDialog());
 
         setupSeekBar();
+        observePlaylists();
+    }
+
+    private void observePlaylists() {
+        mainViewModel.getUserPlaylistsWithSongs().observe(this, playlistsWithSongs -> {
+            if (playlistsWithSongs != null) {
+                userPlaylists.clear();
+                for (PlaylistWithSongs pws : playlistsWithSongs) {
+                    userPlaylists.add(pws.playlist);
+                }
+            }
+        });
     }
 
     private void applyStatusBarPadding() {
@@ -87,13 +99,12 @@ public class NowPlayingActivity extends AppCompatActivity {
     }
 
     private void showAddToPlaylistDialog() {
-        List<Playlist> userPlaylists = MainActivity.getUserPlaylists();
         Song currentSong = musicPlayer.getCurrentSong();
 
         if (currentSong == null) return;
 
         if (userPlaylists == null || userPlaylists.isEmpty()) {
-            Toast.makeText(this, "Nenhuma playlist criada", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, "Crie uma playlist primeiro", Toast.LENGTH_SHORT).show();
             return;
         }
 
@@ -106,8 +117,13 @@ public class NowPlayingActivity extends AppCompatActivity {
         builder.setTitle("Adicionar à playlist")
                 .setItems(playlistNames, (dialog, which) -> {
                     Playlist selectedPlaylist = userPlaylists.get(which);
-                    selectedPlaylist.addSong(currentSong);
-                    MainActivity.savePlaylists(this); // Salva as playlists
+                    
+                    // Salva a relação no banco de dados
+                    PlaylistSongCrossRef crossRef = new PlaylistSongCrossRef(selectedPlaylist.id, currentSong.id);
+                    AppDatabase.databaseWriteExecutor.execute(() -> {
+                        db.playlistDao().addSongToPlaylist(crossRef);
+                    });
+
                     Toast.makeText(NowPlayingActivity.this, "Adicionado a " + selectedPlaylist.getName(), Toast.LENGTH_SHORT).show();
                 });
 
@@ -133,7 +149,8 @@ public class NowPlayingActivity extends AppCompatActivity {
         artist.setText(currentSong.getArtist());
         albumArt.setImageResource(R.drawable.ic_album_placeholder);
         playPause.setImageResource(musicPlayer.isPlaying() ? R.drawable.ic_pause : R.drawable.ic_play_arrow);
-        like.setImageResource(currentSong.isSaved() ? R.drawable.ic_favorite_filled : R.drawable.ic_favorite_border);
+        // TODO: Implementar like com o banco
+        // like.setImageResource(currentSong.isSaved() ? R.drawable.ic_favorite_filled : R.drawable.ic_favorite_border);
 
         updateShuffleButton();
         updateRepeatButton();

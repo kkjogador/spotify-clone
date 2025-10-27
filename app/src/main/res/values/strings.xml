@@ -1,3 +1,4 @@
 <resources>
     <string name="app_name">CadastroFacens</string>
+    <string name="default_web_client_id" translatable="false">1087613188844-25io2gqe1h598c7d5dccffk47nol3rpa.apps.googleusercontent.com</string>
 </resources>

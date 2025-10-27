@@ -51,7 +51,8 @@ public class SearchFragment extends Fragment implements SongAdapter.OnSongIntera
         // Configura a lista de resultados da busca
         searchResultsList.setLayoutManager(new LinearLayoutManager(getContext()));
         if (mainActivity != null) {
-            songAdapter = new SongAdapter(mainActivity.getSongList(), this);
+            // CORREÇÃO: Usando o novo método getAllSongs()
+            songAdapter = new SongAdapter(mainActivity.getAllSongs(), this);
             searchResultsList.setAdapter(songAdapter);
         }
 
@@ -89,12 +90,9 @@ public class SearchFragment extends Fragment implements SongAdapter.OnSongIntera
         }
     }
 
-    // MÉTODO FALTANTE ADICIONADO
     @Override
     public void onOptionsMenuClick(Song song) {
-        if (mainActivity != null) {
-            mainActivity.showSongOptionsMenu(song);
-        }
+        // Não implementado para a busca, mas necessário pela interface
     }
 
     @Override

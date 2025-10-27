@@ -1,12 +1,19 @@
 package com.example.cadastrofacens;
 
+import androidx.room.Entity;
+import androidx.room.PrimaryKey;
+
 import java.io.Serializable;
 
+@Entity(tableName = "songs")
 public class Song implements Serializable {
+    @PrimaryKey(autoGenerate = true)
+    public int id;
+
     private String title;
     private String artist;
     private int fileResId;
-    private boolean isSaved = false; // Novo campo
+    private boolean isSaved = false;
 
     public Song(String title, String artist, int fileResId) {
         this.title = title;
