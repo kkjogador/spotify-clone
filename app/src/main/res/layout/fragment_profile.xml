@@ -68,12 +68,29 @@
 
     </LinearLayout>
 
-    <!-- Botão de Login (Começa Visível) -->
-    <com.google.android.gms.common.SignInButton
-        android:id="@+id/sign_in_button"
+    <!-- Controles que ficam sempre visíveis -->
+    <LinearLayout
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_centerInParent="true"
-        android:visibility="visible" />
+        android:gravity="center"
+        android:orientation="vertical">
+
+        <com.google.android.gms.common.SignInButton
+            android:id="@+id/sign_in_button"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:visibility="visible" />
+
+    </LinearLayout>
+
+    <Button
+        android:id="@+id/debug_db_button"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:layout_centerHorizontal="true"
+        android:layout_marginBottom="16dp"
+        android:text="Debug DB" />
 
 </RelativeLayout>

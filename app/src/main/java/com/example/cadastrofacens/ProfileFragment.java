@@ -29,10 +29,13 @@ import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.auth.GoogleAuthProvider;
 
+import java.util.List;
+
 public class ProfileFragment extends Fragment {
 
     private static final int RC_SIGN_IN = 9001;
     private static final String TAG = "GoogleSignIn";
+    private static final String DEBUG_TAG = "Database_DEBUG";
 
     private FirebaseAuth mAuth;
     private GoogleSignInClient mGoogleSignInClient;
@@ -42,7 +45,7 @@ public class ProfileFragment extends Fragment {
     private ImageView profileImage;
     private TextView profileName, profileEmail;
     private SignInButton signInButton;
-    private Button signOutButton;
+    private Button signOutButton, debugDbButton;
     private View profileInfoLayout;
 
     @Override
@@ -65,6 +68,7 @@ public class ProfileFragment extends Fragment {
         profileEmail = view.findViewById(R.id.profile_email);
         signInButton = view.findViewById(R.id.sign_in_button);
         signOutButton = view.findViewById(R.id.sign_out_button);
+        debugDbButton = view.findViewById(R.id.debug_db_button);
         profileInfoLayout = view.findViewById(R.id.profile_info);
 
         GoogleSignInOptions gso = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
@@ -77,8 +81,46 @@ public class ProfileFragment extends Fragment {
 
         signInButton.setOnClickListener(v -> signIn());
         signOutButton.setOnClickListener(v -> signOut());
+        debugDbButton.setOnClickListener(v -> logDatabaseContents());
 
         return view;
+    }
+
+    private void logDatabaseContents() {
+        AppDatabase.databaseWriteExecutor.execute(() -> {
+            Log.d(DEBUG_TAG, "--- USERS ---");
+            List<User> users = db.userDao().getAllUsers();
+            for (User user : users) {
+                Log.d(DEBUG_TAG, user.toString());
+            }
+
+            Log.d(DEBUG_TAG, "--- PLAYLISTS ---");
+            List<Playlist> playlists = db.playlistDao().getAllPlaylists();
+            for (Playlist playlist : playlists) {
+                Log.d(DEBUG_TAG, playlist.toString());
+            }
+
+            Log.d(DEBUG_TAG, "--- SONGS ---");
+            List<Song> songs = db.songDao().getAllSongs();
+            for (Song song : songs) {
+                Log.d(DEBUG_TAG, song.toString());
+            }
+
+            Log.d(DEBUG_TAG, "--- PLAYLIST-SONG-CROSSREF ---");
+            List<PlaylistSongCrossRef> refs = db.playlistDao().getAllCrossRefs();
+            for (PlaylistSongCrossRef ref : refs) {
+                Log.d(DEBUG_TAG, ref.toString());
+            }
+            
+            Log.d(DEBUG_TAG, "--- RECENTLY PLAYED ---");
+            List<PlayedSong> playedSongs = db.playedSongDao().getAllPlayedSongs();
+            for (PlayedSong playedSong : playedSongs) {
+                Log.d(DEBUG_TAG, playedSong.toString());
+            }
+
+            Log.d(DEBUG_TAG, "--- DATABASE DEBUG COMPLETE ---");
+        });
+        Toast.makeText(getContext(), "Verifique o Logcat para o debug do banco.", Toast.LENGTH_SHORT).show();
     }
 
     @Override
@@ -97,7 +139,7 @@ public class ProfileFragment extends Fragment {
         mAuth.signOut();
         mGoogleSignInClient.signOut().addOnCompleteListener(getActivity(), task -> {
             if (mainActivity != null) {
-                mainActivity.clearUserSession();
+                mainActivity.checkUserStatus();
             }
             updateUI(null);
             Toast.makeText(getContext(), "Você saiu da sua conta.", Toast.LENGTH_SHORT).show();
@@ -129,9 +171,8 @@ public class ProfileFragment extends Fragment {
                             User userToSave = new User(firebaseUser.getUid(), firebaseUser.getDisplayName(), firebaseUser.getEmail(), firebaseUser.getPhotoUrl() != null ? firebaseUser.getPhotoUrl().toString() : null);
                             AppDatabase.databaseWriteExecutor.execute(() -> {
                                 db.userDao().insertOrUpdateUser(userToSave);
-                                // CORREÇÃO: Executa o carregamento de dados na thread principal
                                 if (mainActivity != null) {
-                                    mainActivity.runOnUiThread(() -> mainActivity.loadUserDataFromDb());
+                                    mainActivity.runOnUiThread(() -> mainActivity.checkUserStatus());
                                 }
                             });
                         }

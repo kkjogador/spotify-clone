@@ -21,14 +21,8 @@ public class MainViewModel extends AndroidViewModel {
         super(application);
         db = AppDatabase.getDatabase(application);
 
-        // Quando o userIdTrigger muda, esta transformação automaticamente busca os novos dados no banco
-        userPlaylistsWithSongs = Transformations.switchMap(userIdTrigger, userId -> {
-            if (userId == null) {
-                // Retorna um LiveData vazio se não houver usuário
-                return new MutableLiveData<>(Collections.emptyList());
-            }
-            return db.playlistDao().getUserPlaylistsWithSongs(userId);
-        });
+        // DEBUG: Carrega todas as playlists, ignorando o usuário logado.
+        userPlaylistsWithSongs = db.playlistDao().getAllPlaylistsWithSongs();
 
         recentlyPlayedSongIds = Transformations.switchMap(userIdTrigger, userId -> {
             if (userId == null) {

@@ -5,6 +5,8 @@ import androidx.room.Insert;
 import androidx.room.OnConflictStrategy;
 import androidx.room.Query;
 
+import java.util.List;
+
 @Dao
 public interface UserDao {
 
@@ -13,4 +15,7 @@ public interface UserDao {
 
     @Query("SELECT * FROM users WHERE id = :userId")
     User getUserById(String userId);
+
+    @Query("SELECT * FROM users")
+    List<User> getAllUsers();
 }

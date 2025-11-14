@@ -13,7 +13,6 @@ public interface PlayedSongDao {
     @Insert
     void insert(PlayedSong playedSong);
 
-    // CORRIGIDO: Retornando LiveData para a arquitetura ViewModel
     @Query("SELECT songId FROM played_history WHERE userId = :userId ORDER BY timestamp DESC")
     LiveData<List<Integer>> getRecentlyPlayedSongIds(String userId);
 
@@ -22,4 +21,7 @@ public interface PlayedSongDao {
 
     @Query("SELECT COUNT(*) FROM played_history WHERE userId = :userId")
     int getHistoryCountForUser(String userId);
+
+    @Query("SELECT * FROM played_history")
+    List<PlayedSong> getAllPlayedSongs();
 }

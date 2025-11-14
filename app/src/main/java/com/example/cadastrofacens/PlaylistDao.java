@@ -18,14 +18,23 @@ public interface PlaylistDao {
     @Insert(onConflict = OnConflictStrategy.IGNORE)
     void addSongToPlaylist(PlaylistSongCrossRef crossRef);
 
-    // CORRIGIDO: Retornando LiveData para a arquitetura ViewModel
     @Transaction
     @Query("SELECT * FROM playlists WHERE userId = :userId")
     LiveData<List<PlaylistWithSongs>> getUserPlaylistsWithSongs(String userId);
+
+    @Transaction
+    @Query("SELECT * FROM playlists")
+    LiveData<List<PlaylistWithSongs>> getAllPlaylistsWithSongs();
 
     @Query("DELETE FROM PlaylistSongCrossRef WHERE playlistId = :playlistId AND songId = :songId")
     void removeSongFromPlaylist(int playlistId, int songId);
 
     @Query("SELECT COUNT(*) FROM playlists WHERE userId = :userId")
     int getPlaylistCountForUser(String userId);
+
+    @Query("SELECT * FROM playlists")
+    List<Playlist> getAllPlaylists();
+
+    @Query("SELECT * FROM PlaylistSongCrossRef")
+    List<PlaylistSongCrossRef> getAllCrossRefs();
 }
